@@ -34,7 +34,7 @@ function compute_CJ(κ)
     setprecision(256)
     b = b[2:end]
     a = enlarge.(sqrt.(b))
-    b = enlarge.(b);
+    b = enlarge.(b)
 
     # we first compute the bound on even indices
     α = interval.(Float64, interval.(collect(2:2:N+2))./a[2:2:N+2])
@@ -44,14 +44,14 @@ function compute_CJ(κ)
     α = interval.(Float64, interval.(collect(1:2:N+2))./a[1:2:N+1])
     β = interval.(Float64, a[1:2:N+2].*a[2:2:N+2].*a[3:2:N+3])
     A = α.*P̄⁻¹
-    B = β.*P̄⁻¹;
+    B = β.*P̄⁻¹
     c_α = op_norm([op_norm(A) β[end-1]*norm(A[:,end])*CD/interval(N)^interval(3//4) ;
         interval(0) sqrt(c⁺/c⁻)/(interval(1)-θ)*interval((N+3)//(N+2))^interval(3//4)])
     c_β = op_norm([op_norm(B) β[end-1]*norm(B[:,end])*CD/interval(N)^interval(3//4) ;
         interval(0) c⁺^2/(interval(1)-θ)*interval((N+3)//(N+2))^interval(3//4)/interval(3)])
     CJ₀ = c_α + c_β
 
-    # We now compute the bound on even indices
+    # we now compute the bound on odd indices
     α = interval.(Float64, interval.(collect(1:2:N+3))./a[1:2:N+3])
     β = interval.(Float64, a[1:2:N+3].*a[2:2:N+4].*a[3:2:N+5])
     P̄ = Bidiagonal(α[1:end-1],  β[1:end-2], :U)
@@ -59,7 +59,7 @@ function compute_CJ(κ)
     α = interval.(Float64, interval.(collect(2:2:N+2))./a[2:2:N+2])
     β = interval.(Float64, a[2:2:N+2].*a[3:2:N+3].*a[4:2:N+4])
     A = α.*P̄⁻¹
-    B = β.*P̄⁻¹;
+    B = β.*P̄⁻¹
     c_α = op_norm([op_norm(A) β[end-1]*norm(A[:,end])*CD/interval(N+1)^interval(3//4) ;
         interval(0) sqrt(c⁺/c⁻)/(interval(1)-θ)*interval((N+4)//(N+3))^interval(3//4)])
     c_β = op_norm([op_norm(B) β[end-1]*norm(B[:,end])*CD/interval(N+1)^interval(3//4) ;

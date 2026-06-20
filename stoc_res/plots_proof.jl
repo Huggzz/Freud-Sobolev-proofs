@@ -1,11 +1,10 @@
 using LinearAlgebra, BlockBandedMatrices, IntervalArithmetic, SpecialFunctions, Arblib, BandedMatrices, BlockArrays, SparseArrays, IterativeSolvers, Serialization, Base.Threads, Random
-# nthreads() = 6
 setprecision(8192*16)
 include("get_enclosure.jl")
-include("get_Painleve_bounds.jl");
-include("compute_u.jl");
-include("compute_CP.jl");
-include("compute_CJ.jl");
+include("get_Painleve_bounds.jl")
+include("compute_u.jl")
+include("compute_CP.jl")
+include("compute_CJ.jl")
 
 function compute_Z(κ̃)
     κ̂ = κ̃^2/interval(8)
@@ -19,7 +18,6 @@ end
 
 # the different value of σ (before rescaling) for which we want to compute the bounds
 σs = interval.(BigFloat, [2//10, 287129152//1000000000, 8//10])
-# σs = interval.(BigFloat, 2//10:5//1000:4//10)
 
 # truncation levels for A
 N = 100 # in space (we take N even modes and N odd modes, so 2N in total)
@@ -31,7 +29,6 @@ cols = [[N-mod1(m, 2) for m=-(M-1):M-1] for M in Ms] # size of ū (for each m)
 rows = [ones(Int64, 2*M+1)*N for M in Ms] # size of G(v̄) := F(v̄) - g (for each m)
 
 σN = length(σs)
-# σN = 10 # for testing
 certs = ones(Bool, σN) # flag that will be put to false if something goes wrong during the proof
 setprecision(512)
 ūs = [BlockVector(zeros(Complex{BigFloat}, sum(cols[i])), cols[i]) for i=1:σN]
@@ -115,7 +112,6 @@ for i in 1:σN
     Cₚ = compute_CP(κ̃)
     CJ = compute_CJ(κ̃)
     sup_bounds[i] = I"2"^I"1//4"*Cₚ^I"3//4"*sqrt((CJ+I"1")/(σ*compute_Z(κ̃)))*δs[i]
-    println(I"2"^I"1//4"*Cₚ^I"3//4"*sqrt((CJ+I"1")/(σ*compute_Z(κ̃))))
     setprecision(256)
 end
 

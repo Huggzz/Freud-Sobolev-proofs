@@ -1,10 +1,9 @@
 using LinearAlgebra, BlockBandedMatrices, IntervalArithmetic, SpecialFunctions, Arblib, BandedMatrices, BlockArrays, SparseArrays, IterativeSolvers, Serialization, Base.Threads, Random, Plots, LaTeXStrings
-# nthreads() = 6
 setprecision(8192*16)
 include("get_enclosure.jl")
-include("get_Painleve_bounds.jl");
-include("compute_u.jl");
-include("compute_CP.jl");
+include("get_Painleve_bounds.jl")
+include("compute_u.jl")
+include("compute_CP.jl")
 
 # Fixed parameter values (before rescaling)
 κ = interval(BigFloat, 1)
@@ -12,7 +11,6 @@ include("compute_CP.jl");
 ω = interval(BigFloat, 1//1000)
 
 # the different value of σ (before rescaling) for which we want to compute the bounds
-# σs = interval(BigFloat, 2870/10000:1//100000:2872//10000)
 σs = interval.(BigFloat, 2//10:5//1000:8//10)
 
 # truncation levels for A
@@ -26,7 +24,6 @@ cols = [[N-mod1(m, 2) for m=-(M-1):M-1] for M in Ms] # size of ū (for each m)
 rows = [ones(Int64, 2*M+1)*N for M in Ms] # size of G(v̄) := F(v̄) - g (for each m)
 
 σN = length(σs)
-# σN = 10 # for testing
 certs = ones(Bool, σN) # flag that will be put to false if something goes wrong during the proof
 setprecision(512)
 ūs = [BlockVector(zeros(Complex{BigFloat}, sum(cols[i])), cols[i]) for i=1:σN]
@@ -61,7 +58,6 @@ GC.gc()
 setprecision(8192*16)
 Threads.@threads for i=shuffle(collect(1:σN))
     σ = σs[i]
-    println(i)
     # rescaling the parameters (and changing the precision via enlarge)
     κ̃ = κ/σ*sqrt(interval(BigFloat, 2))
     η̃ = enlarge(η/(σ^interval(3//2))*(interval(BigFloat, 2)^interval(3//4)))
@@ -70,15 +66,12 @@ Threads.@threads for i=shuffle(collect(1:σN))
     # computation of the Painlevé bounds c⁺ and c⁻, valid for all n ≥ N₀
     c⁺, c⁻, cert = get_cs(κ̃, cert, N₀) 
     GC.gc()
-    # println(cert)
     certs[i] = cert
     c⁺s[i] = c⁺
     c⁻s[i] = c⁻
 end
 
 GC.gc()
-
-# Threads.nthreads() = 4
 
 # compute the final error bound for ||v-v̄|| 
 IntervalArithmetic.configure_matmul(:fast)

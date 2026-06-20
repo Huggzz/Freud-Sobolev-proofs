@@ -4,7 +4,7 @@ Base.:*(A::SparseMatrixCSC{Complex{Interval{Float64}}, Int64},x::Vector{Complex{
 LinearAlgebra.norm(v::Vector) = sqrt(sum(abs2.(v)))
 
 function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
-       
+
     # Computation of the Painlevé coefficients bₖ (and of aₖ = \sqrt{bₖ}) 
     b₀ = interval(BigFloat, 0.0)
     b₁ = compute_b1(κ̃)
@@ -15,7 +15,7 @@ function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
     end
 
     setprecision(128)
-    b = enlarge.(b[2:end]);
+    b = enlarge.(b[2:end])
     a = sqrt.(b)
 
     # Computation of the coefficients α, β, λ and μ that go into the operators Lₘ and Jₘ
@@ -35,7 +35,7 @@ function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
         end
     end
 
-    Js = [compute_J(1, N), compute_J(2, N)];
+    Js = [compute_J(1, N), compute_J(2, N)]
 
     function compute_L(m::Int64)
         # computes the operators Lₘ defined in Appendix E.1
@@ -46,7 +46,7 @@ function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
         end
     end
 
-    Ls = [compute_L(m) for m in -M:M];
+    Ls = [compute_L(m) for m in -M:M]
 
     rows = ones(Int64, 2*M+3)*N
     cols = [N-mod1(m, 2) for m=-M:M]
@@ -55,7 +55,6 @@ function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
     # The diagonal blocks themselves are tridiagonal, whereas the upper and lower diagonal blocks are lower triangular, with bandwith 1 or 2 depending on the parity of m)
     F̃ = BandedBlockBandedMatrix(Zeros(Complex{BigFloat}, sum(rows), sum(cols)), rows, cols, (2, 0), (2, 1))
     for m in -M:M
-        # println(m)
         F̃[Block(m+M+2, m+M+1)] = mid.(Ls[m+M+1][:,1:cols[m+M+1]])
         F̃[Block(m+M+1, m+M+1)] = mid.(η̃/I"2"*Js[mod1(m,2)][:,1:cols[m+M+1]])
         F̃[Block(m+M+3, m+M+1)] = mid.(η̃/I"2"*Js[mod1(m,2)][:,1:cols[m+M+1]])
@@ -98,7 +97,6 @@ function compute_ū_Gv̄(η̃,κ̃,ω̃, M, N)
     end
 
     Gv̄ = interval.(Float64, Gv̄)
-    # return ū and G(v̄) = F(v̄) - g
     setprecision(512)
     return mid.(ū), Gv̄
 end

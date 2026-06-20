@@ -1,10 +1,9 @@
 using LinearAlgebra, BlockBandedMatrices, IntervalArithmetic, SpecialFunctions, Arblib, BandedMatrices, BlockArrays, SparseArrays, IterativeSolvers, Serialization, Base.Threads, Random, LaTeXStrings
-# nthreads() = 6
 setprecision(8192*16)
 include("get_enclosure.jl")
-include("get_Painleve_bounds.jl");
-include("compute_u.jl");
-include("compute_CP.jl");
+include("get_Painleve_bounds.jl")
+include("compute_u.jl")
+include("compute_CP.jl")
 
 # Fixed parameter values (before rescaling)
 κ = interval(BigFloat, 1)
@@ -13,7 +12,6 @@ include("compute_CP.jl");
 
 # the different value of σ (before rescaling) for which we want to compute the bounds
 σs = interval(BigFloat, 287129151//1000000000:1//1000000000:287129153//1000000000)
-# σs = interval.(BigFloat, 2//10:5//1000:4//10)
 
 # truncation levels for A
 N = 75 # in space (we take N even modes and N odd modes, so 2N in total)
@@ -25,7 +23,6 @@ cols = [[N-mod1(m, 2) for m=-(M-1):M-1] for M in Ms] # size of ū (for each m)
 rows = [ones(Int64, 2*M+1)*N for M in Ms] # size of G(v̄) := F(v̄) - g (for each m)
 
 σN = length(σs)
-# σN = 10 # for testing
 certs = ones(Bool, σN) # flag that will be put to false if something goes wrong during the proof
 setprecision(512)
 ūs = [BlockVector(zeros(Complex{BigFloat}, sum(cols[i])), cols[i]) for i=1:σN]

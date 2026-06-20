@@ -10,7 +10,7 @@ function Base.inv(P::Bidiagonal{Interval{Float64}, Vector{Interval{Float64}}})
         return UpperTriangular(invC ./ transpose(P.dv))
     else
         # Lower bidiagonal: use forward substitution (via transpose)
-        return LowerTriangular(transpose(inv(trasnpose(P))))
+        return LowerTriangular(transpose(inv(transpose(P))))
     end
 end
 
@@ -35,29 +35,28 @@ function compute_CP(κ)
     setprecision(256)
     b = b[2:end]
     a = enlarge.(sqrt.(b))
-    b = enlarge.(b);
-    # println(maximum(diam.(a)))
+    b = enlarge.(b)
 
     # we first compute the bound on odd indices
     α = interval.(Float64, interval.(collect(1:2:N+1))./a[1:2:N+1])
     β = interval.(Float64, a[1:2:N+1].*a[2:2:N+2].*a[3:2:N+3])
     A = Bidiagonal(α,  β[1:end-1], :U)
-    A⁻¹ = Matrix(interval.(Float64, inv(A)));
+    A⁻¹ = Matrix(interval.(Float64, inv(A)))
     C₁₂ = interval(1)/(C_α*sqrt(interval(1)-θ^2))*β[end]*norm(A⁻¹[:,end])
     C₂₂ = interval(1)/(C_α*(interval(1)-θ))
-    C̄ₚ₁ = op_norm(A⁻¹)^2;
+    C̄ₚ₁ = op_norm(A⁻¹)^2
     supCₚ₁ = op_norm([interval(sqrt(sup(C̄ₚ₁))) C₁₂/interval(N+1)^interval(3//4);
             interval(0) C₂₂/interval(N+1)^interval(3//4)])^2;
-    Cₚ₁ = interval(inf(C̄ₚ₁), sup(supCₚ₁));
-    
-    # We now compute the bound on even indices
+    Cₚ₁ = interval(inf(C̄ₚ₁), sup(supCₚ₁))
+
+    # we now compute the bound on even indices
     α = interval.(Float64, interval.(collect(2:2:N))./a[2:2:N])
     β = interval.(Float64, a[2:2:N].*a[3:2:N+1].*a[4:2:N+2])
     A = Bidiagonal(α,  β[1:end-1], :U)
-    A⁻¹ = Matrix(interval.(Float64, inv(A)));
+    A⁻¹ = Matrix(interval.(Float64, inv(A)))
     C₁₂ = interval(1)/(C_α*sqrt(interval(1)-θ^2))*β[end]*norm(A⁻¹[:,end])
-    C₂₂ = interval(1)/(C_α*(interval(1)-θ));
-    C̄ₚ₀ = op_norm(A⁻¹)^2;
+    C₂₂ = interval(1)/(C_α*(interval(1)-θ))
+    C̄ₚ₀ = op_norm(A⁻¹)^2
     supCₚ₀ = op_norm([interval(sqrt(sup(C̄ₚ₀))) C₁₂/interval(N)^interval(3//4);
             interval(0) C₂₂/interval(N)^interval(3//4)])^2;
     Cₚ₀ = max(interval(inf(C̄ₚ₀), sup(supCₚ₀)));

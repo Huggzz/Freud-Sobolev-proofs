@@ -1,5 +1,4 @@
 using IntervalArithmetic, SpecialFunctions, Arblib, Serialization
-# nthreads() = 6
 
 function enlarge(x::Interval{BigFloat})
     isguaranteed(x) || error("interval is not guaranteed")
@@ -32,7 +31,6 @@ function get_cs(κ, cert, N₀)
 
     # check asymptotic condition (Step 3)
     N₂ = 2000000
-        # println(N₂)
     cond1 = sqrt(interval(12)+(-sqrt(interval(3)/interval(N₂))*κ+c⁺*(sqrt(interval(1)-interval(1)/interval(N₂))+sqrt(interval(1)+interval(1)/interval(N₂))))^2)-interval(2)*c⁺-interval(2)*c⁻
     cond2 = interval(2)*c⁺-(sqrt(interval(12)+(interval(2)*c⁻)^2)+sqrt(interval(3)/interval(N₂))*κ-c⁻*(sqrt(interval(1)-interval(1)/interval(N₂))+sqrt(interval(1)+interval(1)/interval(N₂))))
     if !(inf(cond1)>0 && inf(cond2)>0)
@@ -63,7 +61,7 @@ function get_cs(κ, cert, N₀)
         b[n+1] = κ+(interval(BigFloat, n-1)/b[n])-b[n]-b[n-1]
     end
 
-    b = interval.(Float64, b[2:end]);
+    b = interval.(Float64, b[2:end])
     
     # find minimum bound N₁ such that sqrt bound is satisfied for all n ≥ N₁ (Step 5)
     N₁ = argmax(cumsum((inf.(b⁺[1:N₃]-b[1:N₃]).<=0) .|| (inf.(b[1:N₃]-b⁻[1:N₃]).<=0)))
@@ -79,15 +77,13 @@ function get_cs(κ, cert, N₀)
                 b⁺[i] *= I"1.01"
             end
         end
-        # println("test1")
-        Sb⁺ = f.(g.(vcat(interval(0.0),b⁺[1:N₂-1]), vcat(b⁺[2:N₂], B⁺(interval(N₂+1))), interval(Float64, κ), interval.(collect(1:N₂)))).*sqrt.(interval.(1:N₂));
+        Sb⁺ = f.(g.(vcat(interval(0.0),b⁺[1:N₂-1]), vcat(b⁺[2:N₂], B⁺(interval(N₂+1))), interval(Float64, κ), interval.(collect(1:N₂)))).*sqrt.(interval.(1:N₂))
         N₄ = argmax(cumsum((inf.(b⁺-Sb⁻).<=0) .||(inf.(Sb⁺-b⁻).<=0)))
         for i in N₄:-1:1
             while inf(Sb⁺[i]-b⁻[i]) <= 0.0
                 b⁻[i] *= I"0.999"
             end
         end
-        # println("test2")
         Sb⁻ = f.(g.(vcat(interval(0.0),b⁻[1:N₂-1]), vcat(b⁻[2:N₂], B⁻(interval(N₂+1))), interval(Float64, κ), interval.(collect(1:N₂)))).*sqrt.(interval.(1:N₂))
         N₄ = argmax(cumsum((inf.(b⁺-Sb⁻).<=0) .||(inf.(Sb⁺-b⁻).<=0)))
     end
@@ -100,7 +96,8 @@ function get_cs(κ, cert, N₀)
             break
         end
     end
-    N₁    # increase c⁺ until bound is satisfied
+
+    # increase c⁺ until bound is satisfied
     while true
         if any(inf.(B⁺.(interval.(collect(N₀:N₁+5)))) .< sup.(b[N₀:N₁+5]))
             c⁺ *= I"1.001"
