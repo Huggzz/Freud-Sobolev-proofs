@@ -151,7 +151,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
     for k = 2:2*N+2*K+2
         b[k+1] = κ̃+(interval(BigFloat, k-1)/b[k])-b[k]-b[k-1]
     end
-    b = interval.(Float64, b[2:end])
+    b = interval.(Float64, b[2:end]);
     a = sqrt.(b)
 
     # sequences defined in Appendix E.1
@@ -172,7 +172,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
         end
         return sqrt.(d²)
     end
-    ds = [compute_d(m) for m in -M:M]
+    ds = [compute_d(m) for m in -M:M];
     
     # χ and γ constants in Appendix E.2
     χ = C_μ/C_λ
@@ -204,7 +204,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
         end
     end
 
-    Js = [compute_J(1, N), compute_J(2, N)]
+    Js = [compute_J(1, N), compute_J(2, N)];
 
     function compute_U(m::Int64, d, N)
         # computes the upper triangular matrix U defined in Appendix E.1
@@ -276,12 +276,15 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
         L⁻¹ = compute_inv_L(U, ξ_N)
         B = ((η̃/interval(2))*Js[mod1(m, 2)])*L⁻¹
         normB¹¹ = op_norm(B[:,1:end - mod1(m,2)])
+        # println(normB¹¹)
         normB¹²₁ = op_norm(B[:,end - mod1(m,2)+1:end])
         normB¹²₂ = Z¹²_fact*abs(μ[2*N+mod1(m,2)-2]/d[2*N+mod1(m,2)-2])*norm(Js[mod1(m, 2)]*U⁻¹[:,end])
+        # normB¹² = norm([normB¹²₁, normB¹²₂])
         normB¹² = normB¹²₁ + normB¹²₂
         normB²¹ = Z²¹_fact*sqrt(abs(ξ_Nm))*norm(U⁻¹[1:N-mod1(m,2),N-mod1(m,2)])
         normB = op_norm([normB¹¹ normB¹²;
             normB²¹ Z²²])
+        # println(normB¹¹)
         return normB, cert
     end
 
@@ -291,14 +294,16 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
     Z_B2, cert = bound_B(-M-3, cert)
     Z_B1 *= I"2"
     Z_B2 *= I"2"
+    # println("Z_B1 = ", Z_B1)
+    # println("Z_B2 = ", Z_B2)
 
     # compute all finite dimensional projections of all the operators
-    Us = [compute_U(m, ds[m+M+1], N) for m in -M:M]
-    inv_Us = [inv(U) for U in Us]
+    Us = [compute_U(m, ds[m+M+1], N) for m in -M:M];
+    inv_Us = [inv(U) for U in Us];
     ξ_Ns = [compute_ξ(m, N, ds[m+M+1]) for m in -M:M]
     ξ_Nms = [compute_ξ(m, N - mod1(m,2), ds[m+M+1]) for m in -M:M]
-    L̃s = [compute_L̃(m, Us[m+M+1], ξ_Ns[m+M+1]) for m in -M:M]
-    inv_Ls = [compute_inv_L(Us[m+M+1], ξ_Ns[m+M+1]) for m in -M:M]
+    L̃s = [compute_L̃(m, Us[m+M+1], ξ_Ns[m+M+1]) for m in -M:M];
+    inv_Ls = [compute_inv_L(Us[m+M+1], ξ_Ns[m+M+1]) for m in -M:M];
 
     # computes operator norms involved in the faster estimaton of id-A¹¹F̄¹¹ (see Appendix E.3)
     L̃_norms = [op_norm(L) for L in L̃s];
@@ -310,6 +315,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
     # Constructs the matrix F̃¹¹ defined in Appendix E.3 (banded block tridiagonal matrix)
     F̃¹¹ = BandedBlockBandedMatrix(Zeros(Complex{Interval{Float64}}, sum(rows), sum(cols)), rows, cols, (1, 1), (2, 1))
     for m in -M:M
+        # println(m)
         F̃¹¹[Block(m+M+1, m+M+1)] = L̃s[m+M+1]
         if m > -M
             F̃¹¹[Block(m+M, m+M+1)] = η̃/I"2"*Js[mod1(m,2)]
@@ -355,13 +361,15 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
 
     for i=1:2*M+1
         AᵢₘBₘ₋₁ = L̃s[i]*ÃₘBₘ₋₁[Block(i,1)]
-        Zᵢₘ¹¹ = lazy_op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
+        Zᵢₘ¹¹ = η̃/I"2"*lazy_op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
         if sup.(Zᵢₘ¹¹) > 0.000001
-            Zᵢₘ¹¹ = op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
+            Zᵢₘ¹¹ = η̃/I"2"*op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
 
         end
-        temp₁ = op_norm(AᵢₘBₘ₋₁[:,end - mod1(-M-1,2)+1:end])
-        temp₂ = Z¹²_fact*abs(μ[2*N+mod1(-M-1,2)-2]/d[2*N+mod1(-M-1,2)-2])*norm(AᵢₘBₘ₋₁*U⁻¹[:,end])
+        temp₁ = η̃/I"2"*op_norm(AᵢₘBₘ₋₁[:,end - mod1(-M-1,2)+1:end])
+        ÃₘJU⁻¹ = BlockVector(ÃₘJ*(U⁻¹[:,end]), rows)
+        temp₂  = Z¹²_fact*abs(μ[2*N+mod1(-M-1,2)-2]/d[2*N+mod1(-M-1,2)-2])*norm(L̃s[i]*ÃₘJU⁻¹[Block(i)])
+        # Zᵢₘ¹² = norm([temp₁, temp₂])
         Zᵢₘ¹² = temp₁ + temp₂
         if i==1
             # the Zᵢₘ²¹ formula given in the paper can be rewritten in terms of ξ
@@ -381,7 +389,9 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
 
     # initialise ÃGv̄ (which will be used to compute the Y bound)
     ÃGv̄ = BlockVector(zeros(Complex{Interval{Float64}}, sum(rows)), rows)
-
+    # ÃJ = zeros(Complex{Interval{Float64}}, size(Ãₘ₋₁J))
+    # ÃJU⁻¹ = BlockVector(zeros(Complex{Interval{Float64}}, sum(rows)), rows)
+    # Rₘ = BlockArray(zeros(Complex{Interval{Float64}}, sum(rows), sum(col)), rows, col)
     # now iterate on m (only need to do half the columns thanks to symmetry)
     for m in -M:0
         # apply Ãₘ to the residue
@@ -406,6 +416,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
             temp₁ = norm_Rᵢₘ*L̃_norms[i]*inv_L_norms_m[m+M+1]
 
             temp₂ = Z¹²_fact*abs(μ[2*N+mod1(m,2)-2]/ds[m+M+1][2*N+mod1(m,2)-2])*norm(L̃s[i]*ÃJU⁻¹[Block(i)])
+            # Zᵢₘ¹² = norm([temp₁, temp₂])
             Zᵢₘ¹² = temp₁ + temp₂
             if (i == m+M) || (i == m+M+2)
                 # the Zᵢₘ²¹ formula given in the paper can be rewritten in terms of ξ
@@ -465,6 +476,7 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
     end
 
     # final error bound δ as in Section 5.2
+    cert = cert && (sup(Z) < 1)
     δ = Y/(I"1"-Z)
     return δ, cert
 end
