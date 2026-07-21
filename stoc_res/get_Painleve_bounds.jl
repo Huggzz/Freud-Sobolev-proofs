@@ -64,7 +64,7 @@ function get_cs(κ, cert, N₀)
     b = interval.(Float64, b[2:end])
     
     # find minimum bound N₁ such that sqrt bound is satisfied for all n ≥ N₁ (Step 5)
-    N₁ = argmax(cumsum((inf.(b⁺[1:N₃]-b[1:N₃]).<=0) .|| (inf.(b[1:N₃]-b⁻[1:N₃]).<=0)))
+    N₁ = argmax(cumsum((inf.(b⁺[1:N₃]-b[1:N₃]).<=0) .|| (inf.(b[1:N₃]-b⁻[1:N₃]).<=0)))+1
 
     # first rank where sqrt bound is not satisfied
     N₄ = argmax(cumsum((inf.(b⁺-Sb⁻).<=0) .||(inf.(Sb⁺-b⁻).<=0)))

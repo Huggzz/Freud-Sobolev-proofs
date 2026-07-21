@@ -102,7 +102,7 @@ Xu = interval.(BigFloat, X .+ ϵ)
 
 
 # check enclosure via intermediate value Thm and fundamental Thm of Algebra
-if all(sign.(eval_poly(p, Xl)).*sign.(eval_poly(p, Xu)) .==-1) && all(sup.(Xl[1:end-1]).< inf.(Xu[2:end])) && length(Xl) == N÷2
+if all(sign.(eval_poly(p, Xl)).*sign.(eval_poly(p, Xu)) .==-1) && all(sup.(Xu[1:end-1]).< inf.(Xl[2:end])) && length(Xl) == N÷2
     println("enclosure of roots checked")
 else
     println("enclosure of roots failed")
@@ -213,7 +213,7 @@ Xu = interval.(BigFloat, X .+ ϵ)
 
 
 # check enclosure via intermediate value Thm and fundamental Thm of Algebra
-if all(sign.(eval_poly(p, Xl)).*sign.(eval_poly(p, Xu)) .==-1) && all(sup.(Xl[1:end-1]).< inf.(Xu[2:end])) && length(Xl) == N÷2
+if all(sign.(eval_poly(p, Xl)).*sign.(eval_poly(p, Xu)) .==-1) && all(sup.(Xu[1:end-1]).< inf.(Xl[2:end])) && length(Xl) == N÷2
     println("enclosure of roots checked")
 else
     println("enclosure of roots failed")
