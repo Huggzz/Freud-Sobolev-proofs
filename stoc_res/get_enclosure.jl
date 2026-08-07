@@ -355,20 +355,20 @@ function compute_δ(c⁺, c⁻, η̃, κ̃, ω̃, cert, M, N, Gv̄)
     ξ_N = compute_ξ(-M-1, N, d)
     ξ_Nm = compute_ξ(-M-1, N-mod1(-M-1,2), d)
     L⁻¹ = compute_inv_L(U, ξ_N)
-    ÃₘBₘ₋₁ = BlockArray(ÃₘJ*L⁻¹, rows, col)
+    ÃₘBₘ₋₁ = BlockArray(η̃/I"2"*ÃₘJ*L⁻¹, rows, col)
 
     Z_left, cert = bound_B(-M-1, cert)
 
     for i=1:2*M+1
         AᵢₘBₘ₋₁ = L̃s[i]*ÃₘBₘ₋₁[Block(i,1)]
-        Zᵢₘ¹¹ = η̃/I"2"*lazy_op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
+        Zᵢₘ¹¹ = lazy_op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
         if sup.(Zᵢₘ¹¹) > 0.000001
-            Zᵢₘ¹¹ = η̃/I"2"*op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
+            Zᵢₘ¹¹ = op_norm(AᵢₘBₘ₋₁[:,1:end - mod1(-M-1,2)])
 
         end
-        temp₁ = η̃/I"2"*op_norm(AᵢₘBₘ₋₁[:,end - mod1(-M-1,2)+1:end])
+        temp₁ = op_norm(AᵢₘBₘ₋₁[:,end - mod1(-M-1,2)+1:end])
         ÃₘJU⁻¹ = BlockVector(ÃₘJ*(U⁻¹[:,end]), rows)
-        temp₂  = Z¹²_fact*abs(μ[2*N+mod1(-M-1,2)-2]/d[2*N+mod1(-M-1,2)-2])*norm(L̃s[i]*ÃₘJU⁻¹[Block(i)])
+        temp₂  = abs(μ[2*N+mod1(-M-1,2)-2]/d[2*N+mod1(-M-1,2)-2])*norm(L̃s[i]*ÃₘJU⁻¹[Block(i)])/(C_d^2*(interval(2*N)*(I"1"-ϑ^2))^I"3//2")
         # Zᵢₘ¹² = norm([temp₁, temp₂])
         Zᵢₘ¹² = temp₁ + temp₂
         if i==1
